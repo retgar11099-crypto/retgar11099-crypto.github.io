@@ -1,5 +1,51 @@
 import { useState, useEffect } from 'react'
 
+// ─── Supabase (общий проект сети) ─────────────────────────────────────────────
+const SUPABASE_URL = 'https://tgleohmsmwqlvndxfykv.supabase.co'
+const SUPABASE_ANON_KEY = 'sb_publishable_vOM4373bRXKYAnUeEdTIDA_5gDXE98F'
+const EMAIL_DOMAIN = 'players.dsv-zombi.local'
+const ADMIN_NICK = 'Faranatic'
+
+const sb: any = typeof window !== 'undefined' ? (window as any).supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null
+const emailFor = (nick: string) => `${nick.toLowerCase()}@${EMAIL_DOMAIN}`
+const resolveNick = (user: any) => (user?.user_metadata?.nick as string) || user?.email?.split('@')[0] || 'user'
+
+type Role = 'founder' | 'admin' | 'player'
+type Me = { id: string; nick: string; role: Role }
+type NexusSite = { slug: string; title: string; url: string; maintenance: boolean; sort: number }
+
+const FALLBACK_SITES: NexusSite[] = [
+  { slug: 'hub', title: 'NEXUS HUB', url: 'https://protocold7.ru/', maintenance: false, sort: 0 },
+  { slug: 'barotrauma', title: 'RU, EU (SCX)', url: 'https://retgar11099-crypto.github.io/barotrauma/', maintenance: false, sort: 1 },
+  { slug: 'skyhold', title: 'SkyHold', url: 'https://retgar11099-crypto.github.io/skyhold/', maintenance: false, sort: 2 },
+  { slug: 'project-zomboid', title: 'Project Mantani', url: 'https://retgar11099-crypto.github.io/project-zomboid/', maintenance: false, sort: 3 },
+  { slug: 'dsv-zombi', title: 'DSV-Zombi', url: 'https://retgar11099-crypto.github.io/dsv-zombi/', maintenance: false, sort: 4 },
+  { slug: 'gihten', title: 'Gihten', url: 'https://retgar11099-crypto.github.io/gihten/', maintenance: false, sort: 5 },
+  { slug: 'redlauncher', title: 'RED LAUNCHER', url: 'https://red.protocold7.ru/', maintenance: false, sort: 6 },
+  { slug: 'watchgrid', title: 'WATCH_GRID', url: 'https://watch.protocold7.ru/', maintenance: false, sort: 7 },
+]
+
+function isFounder(me: Me | null) {
+  return !!me && (me.role === 'founder' || me.nick.toLowerCase() === ADMIN_NICK.toLowerCase())
+}
+
+async function ensureProfile(userId: string, nick: string, sites: string[] = []): Promise<Me | null> {
+  if (!sb) return null
+  const { data } = await sb.from('profiles').select('id,nick,role').eq('id', userId).maybeSingle()
+  let profile = data as Me | null
+  if (!profile) {
+    const role: Role = nick.toLowerCase() === ADMIN_NICK.toLowerCase() ? 'founder' : 'player'
+    const { error } = await sb.from('profiles').insert({ id: userId, nick, role })
+    if (error) return null
+    profile = { id: userId, nick, role }
+  }
+  if (sites.length) {
+    const rows = sites.map((slug) => ({ user_id: userId, site_slug: slug, nick: profile!.nick }))
+    await sb.from('nexus_memberships').upsert(rows, { onConflict: 'user_id,site_slug', ignoreDuplicates: true })
+  }
+  return profile
+}
+
 const NOISE_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")`
 
 const NAV_LINKS = [
@@ -56,6 +102,7 @@ function ServerCard({
   stripe,
   glitch,
   pattern,
+  maintenance,
 }: {
   code: string
   title: string
@@ -73,16 +120,19 @@ function ServerCard({
   stripe?: boolean
   glitch?: boolean
   pattern?: string
+  maintenance?: boolean
 }) {
   const [hovered, setHovered] = useState(false)
 
   const online = status?.online
-  const dotColor = status ? (online ? '#5fe08a' : '#e06060') : accentColor
-  const statusText = status
-    ? online
-      ? 'ONLINE' + (typeof status.players === 'number' ? ` · ${status.players}${status.max ? '/' + status.max : ''}` : '')
-      : 'OFFLINE'
-    : statusLabel
+  const dotColor = maintenance ? '#f0c93a' : status ? (online ? '#5fe08a' : '#e06060') : accentColor
+  const statusText = maintenance
+    ? 'ТЕХ РАБОТЫ'
+    : status
+      ? online
+        ? 'ONLINE' + (typeof status.players === 'number' ? ` · ${status.players}${status.max ? '/' + status.max : ''}` : '')
+        : 'OFFLINE'
+      : statusLabel
 
   return (
     <div style={{ animation: `card-reveal 0.9s cubic-bezier(0.22, 0.9, 0.32, 1) both`, animationDelay: revealDelay }}>
@@ -278,6 +328,171 @@ function ServerCard({
   )
 }
 
+// ─── Auth modal (единый аккаунт сети) ────────────────────────────────────────
+function NexusAuthModal({ sites, onClose, onAuth }: { sites: NexusSite[]; onClose: () => void; onAuth: (me: Me) => void }) {
+  const [mode, setMode] = useState<'login' | 'register'>('login')
+  const [nick, setNick] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [selected, setSelected] = useState<string[]>(() => FALLBACK_SITES.map((s) => s.slug))
+  const [captchaAnswer, setCaptchaAnswer] = useState('')
+  const [captcha] = useState(() => ({ a: 2 + Math.floor(Math.random() * 8), b: 2 + Math.floor(Math.random() * 8) }))
+  const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const list = sites.length ? sites : FALLBACK_SITES
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
+  const toggleSite = (slug: string) =>
+    setSelected((cur) => (cur.includes(slug) ? cur.filter((s) => s !== slug) : [...cur, slug]))
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setError(''); setNotice('')
+    if (!sb) return setError('Сеть недоступна, попробуйте позже.')
+    const nick2 = nick.trim(); const mail = email.trim()
+    if (mode === 'register') {
+      if (!/^[A-Za-z0-9_]{3,16}$/.test(nick2)) return setError('Позывной: 3–16 символов, латиница, цифры и _.')
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) return setError('Введите корректный e-mail.')
+      if (password.length < 6) return setError('Пароль не короче 6 символов.')
+      if (Number(captchaAnswer) !== captcha.a + captcha.b) return setError('Неверный ответ на проверку.')
+    } else if (!nick2 || !password) return setError('Заполните позывной/почту и пароль.')
+
+    setBusy(true)
+    try {
+      if (mode === 'login') {
+        const loginEmail = nick2.includes('@') ? nick2 : emailFor(nick2)
+        const { data, error: authError } = await sb.auth.signInWithPassword({ email: loginEmail, password })
+        if (authError) { setError('Неверный позывной/почта или пароль.'); return }
+        const me = await ensureProfile(data.user.id, resolveNick(data.user))
+        if (!me) { setError('Не удалось загрузить профиль.'); return }
+        onAuth(me)
+      } else {
+        const { data, error: authError } = await sb.auth.signUp({
+          email: mail, password, options: { data: { nick: nick2 } },
+        })
+        if (authError) {
+          setError(/already|registered|exists/i.test(authError.message) ? 'Эта почта или позывной уже заняты.' : 'Ошибка регистрации: ' + authError.message)
+          return
+        }
+        if (data?.session && data.user) {
+          const me = await ensureProfile(data.user.id, nick2, selected)
+          if (!me) { setError('Не удалось создать профиль.'); return }
+          onAuth(me)
+        } else {
+          setPassword(''); setMode('login')
+          setNotice(`Профиль создан. Подтвердите e-mail (${mail}) и войдите.`)
+        }
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="nx-modal-backdrop" onMouseDown={onClose}>
+      <div className="nx-modal" onMouseDown={(e) => e.stopPropagation()}>
+        <button className="nx-close" onClick={onClose} aria-label="Закрыть">✕</button>
+        <p className="nx-eyebrow">NEXUS // ЕДИНЫЙ АККАУНТ</p>
+        <h2 className="nx-modal-title">{mode === 'login' ? 'Вход в сеть' : 'Регистрация в сети'}</h2>
+        <p className="nx-modal-copy">
+          {mode === 'login'
+            ? 'Один аккаунт для всех сайтов сети. Войдите по позывному или e-mail.'
+            : 'Создайте аккаунт и отметьте сайты, где хотите участвовать. Потом можно войти этим же логином на любом сайте.'}
+        </p>
+        <form onSubmit={submit}>
+          <label className="nx-label">{mode === 'login' ? 'ПОЗЫВНОЙ ИЛИ EMAIL' : 'ПОЗЫВНОЙ'}
+            <input className="nx-input" autoFocus value={nick} onChange={(e) => setNick(e.target.value)} placeholder={mode === 'login' ? 'Faranatic или you@mail.com' : 'Faranatic'} />
+          </label>
+          {mode === 'register' && (
+            <label className="nx-label">EMAIL
+              <input className="nx-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+            </label>
+          )}
+          <label className="nx-label">ПАРОЛЬ
+            <input className="nx-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
+          </label>
+          {mode === 'register' && (
+            <>
+              <label className="nx-label">ПРОВЕРКА: СКОЛЬКО БУДЕТ {captcha.a} + {captcha.b}?
+                <input className="nx-input" inputMode="numeric" value={captchaAnswer} onChange={(e) => setCaptchaAnswer(e.target.value)} placeholder="Ответ" />
+              </label>
+              <div className="nx-sites">
+                <div className="nx-sites-head">ГДЕ РЕГИСТРИРУЕМСЯ?</div>
+                <div className="nx-sites-grid">
+                  {list.map((s) => (
+                    <label key={s.slug} className={'nx-site' + (selected.includes(s.slug) ? ' on' : '')}>
+                      <input type="checkbox" checked={selected.includes(s.slug)} onChange={() => toggleSite(s.slug)} />
+                      <span>{s.title}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+          {error && <p className="nx-error">{error}</p>}
+          {notice && <p className="nx-notice">{notice}</p>}
+          <button className="nx-primary" type="submit" disabled={busy}>
+            {busy ? '...' : mode === 'login' ? 'ВОЙТИ В СЕТЬ' : 'СОЗДАТЬ АККАУНТ'}
+          </button>
+        </form>
+        <button className="nx-link" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); setNotice('') }}>
+          {mode === 'login' ? 'Нет аккаунта? Создать' : 'У меня уже есть аккаунт'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Maintenance overlay (дождливый фон) ──────────────────────────────────────
+function NexusMaintenance({ title, onFounderLogin }: { title?: string; onFounderLogin?: () => void }) {
+  return (
+    <div className="nx-maint">
+      <div className="nx-rain" aria-hidden="true" />
+      <div className="nx-maint-inner">
+        <p className="nx-eyebrow">СИСТЕМНОЕ СООБЩЕНИЕ // 503</p>
+        <h1 className="nx-maint-title">{title ? `${title} — ТЕХНИЧЕСКИЕ РАБОТЫ` : 'ТЕХНИЧЕСКИЕ РАБОТЫ'}</h1>
+        <p className="nx-maint-text">Сайт на технических работах. Мы обновляем узлы — скоро всё заработает.</p>
+        {onFounderLogin && <button className="nx-link" onClick={onFounderLogin}>Вход для основателя</button>}
+      </div>
+    </div>
+  )
+}
+
+// ─── Founder console ──────────────────────────────────────────────────────────
+function FounderConsole({ sites, onToggle, onClose }: { sites: NexusSite[]; onToggle: (slug: string, value: boolean) => void; onClose: () => void }) {
+  const list = sites.length ? sites : FALLBACK_SITES
+  return (
+    <div className="nx-modal-backdrop" onMouseDown={onClose}>
+      <div className="nx-modal wide" onMouseDown={(e) => e.stopPropagation()}>
+        <button className="nx-close" onClick={onClose} aria-label="Закрыть">✕</button>
+        <p className="nx-eyebrow">ROOT_CONSOLE // ОСНОВАТЕЛЬ</p>
+        <h2 className="nx-modal-title">Тех работы по сайтам</h2>
+        <p className="nx-modal-copy">Включите «V» — сайт покажет заглушку «тех работы» всем, кроме админов.</p>
+        <div className="nx-toggle-list">
+          {[...list].sort((a, b) => a.sort - b.sort).map((s) => (
+            <div key={s.slug} className={'nx-toggle-row' + (s.maintenance ? ' on' : '')}>
+              <div className="nx-toggle-info">
+                <b>{s.title}</b>
+                <span>{s.url.replace(/^https?:\/\//, '')}</span>
+              </div>
+              <button className={'nx-switch' + (s.maintenance ? ' on' : '')} onClick={() => onToggle(s.slug, !s.maintenance)} aria-pressed={s.maintenance}>
+                <span className="nx-knob" />
+              </button>
+            </div>
+          ))}
+        </div>
+        <p className="nx-modal-copy small">Красный = техработы включены.</p>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [time, setTime] = useState(() => new Date().toLocaleTimeString('ru-RU', { hour12: false }))
   const [menuOpen, setMenuOpen] = useState(false)
@@ -302,6 +517,52 @@ export default function App() {
   const [rebel, setRebel] = useState(false)
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [galleryIdx, setGalleryIdx] = useState<number | null>(null)
+
+  // ── единый аккаунт сети + техработы ──
+  const [me, setMe] = useState<Me | null>(null)
+  const [sites, setSites] = useState<NexusSite[]>(FALLBACK_SITES)
+  const [authOpen, setAuthOpen] = useState(false)
+  const [founderOpen, setFounderOpen] = useState(false)
+
+  const loadSites = async () => {
+    if (!sb) return
+    const { data, error } = await sb.from('nexus_sites').select('slug,title,url,maintenance,sort').order('sort')
+    if (!error && data) setSites(data as NexusSite[])
+  }
+
+  useEffect(() => {
+    if (!sb) return
+    loadSites()
+    sb.auth.getSession().then(async ({ data }: any) => {
+      const user = data?.session?.user
+      if (user) {
+        const profile = await ensureProfile(user.id, resolveNick(user))
+        if (profile) setMe(profile)
+      }
+    })
+    const { data: sub } = sb.auth.onAuthStateChange(async (_event: string, session: any) => {
+      if (session?.user) {
+        const profile = await ensureProfile(session.user.id, resolveNick(session.user))
+        if (profile) setMe(profile)
+      } else {
+        setMe(null)
+      }
+    })
+    const channel = sb.channel('nexus-sites').on('postgres_changes', { event: '*', schema: 'public', table: 'nexus_sites' }, loadSites).subscribe()
+    return () => { sub?.subscription?.unsubscribe?.(); sb.removeChannel(channel) }
+  }, [])
+
+  const onAuthed = async (profile: Me) => { setMe(profile); setAuthOpen(false); await loadSites() }
+
+  const logout = async () => { setFounderOpen(false); setMe(null); if (sb) await sb.auth.signOut() }
+
+  const toggleMaintenance = async (slug: string, value: boolean) => {
+    setSites((list) => list.map((s) => (s.slug === slug ? { ...s, maintenance: value } : s)))
+    if (sb) await sb.from('nexus_sites').update({ maintenance: value, updated_at: new Date().toISOString() }).eq('slug', slug)
+  }
+
+  const maintOf = (slug: string) => !!sites.find((s) => s.slug === slug)?.maintenance
+  const hubMaint = maintOf('hub')
 
   useEffect(() => {
     let alive = true
@@ -345,6 +606,15 @@ export default function App() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [galleryOpen])
+
+  if (hubMaint && !isFounder(me)) {
+    return (
+      <>
+        <NexusMaintenance onFounderLogin={() => setAuthOpen(true)} />
+        {authOpen && <NexusAuthModal sites={sites} onClose={() => setAuthOpen(false)} onAuth={onAuthed} />}
+      </>
+    )
+  }
 
   return (
     <div
@@ -467,6 +737,19 @@ export default function App() {
           <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#4a5474', letterSpacing: '0.1em' }}>
             {time}
           </span>
+          {me ? (
+            <div className="nx-user">
+              {isFounder(me) && (
+                <button className="nx-chip root" onClick={() => setFounderOpen(true)} title="Консоль основателя">
+                  ⛭ {me.nick}
+                </button>
+              )}
+              {!isFounder(me) && <span className="nx-chip">{me.nick}</span>}
+              <button className="nx-logout" onClick={logout}>выйти</button>
+            </div>
+          ) : (
+            <button className="nx-login-btn" onClick={() => setAuthOpen(true)}>ВОЙТИ</button>
+          )}
           <button
             className="menu-toggle"
             onClick={() => setMenuOpen(o => !o)}
@@ -625,6 +908,7 @@ export default function App() {
             revealDelay="1.2s"
             href="https://retgar11099-crypto.github.io/barotrauma/"
             pattern="pattern-sonar"
+            maintenance={maintOf('barotrauma')}
           />
           <ServerCard
             code="SRV-002 // SKYH"
@@ -640,6 +924,7 @@ export default function App() {
             revealDelay="1.32s"
             href="https://retgar11099-crypto.github.io/skyhold/"
             pattern="pattern-runes"
+            maintenance={maintOf('skyhold')}
           />
           <ServerCard
             code="SRV-003 // MNTN"
@@ -656,6 +941,7 @@ export default function App() {
             stripe
             href="https://retgar11099-crypto.github.io/project-zomboid/"
             pattern="pattern-hazard"
+            maintenance={maintOf('project-zomboid')}
           />
           <ServerCard
             code="SRV-004 // DSV"
@@ -672,6 +958,7 @@ export default function App() {
             revealDelay="1.56s"
             href="https://retgar11099-crypto.github.io/dsv-zombi/"
             pattern="pattern-biohazard"
+            maintenance={maintOf('dsv-zombi')}
           />
           <ServerCard
             code="SRV-005 // GHTN"
@@ -686,6 +973,7 @@ export default function App() {
             revealDelay="1.68s"
             href="https://retgar11099-crypto.github.io/gihten/"
             pattern="pattern-grid"
+            maintenance={maintOf('gihten')}
           />
           <ServerCard
             code="SRV-006 // NC"
@@ -701,6 +989,7 @@ export default function App() {
             glitch
             pattern="pattern-scan"
             href="https://red.protocold7.ru/"
+            maintenance={maintOf('redlauncher')}
           />
         </div>
 
@@ -825,6 +1114,9 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {authOpen && <NexusAuthModal sites={sites} onClose={() => setAuthOpen(false)} onAuth={onAuthed} />}
+      {founderOpen && isFounder(me) && <FounderConsole sites={sites} onToggle={toggleMaintenance} onClose={() => setFounderOpen(false)} />}
     </div>
   )
 }

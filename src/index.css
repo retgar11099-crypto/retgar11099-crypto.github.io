@@ -916,4 +916,247 @@ html, body, #root {
   51%      { filter: none; }
 }
 
+/* ═══ NEXUS: единый аккаунт, техработы, дождливый фон ───────────────────── */
+
+/* дождливый фон (по мотивам Uiverse by SelfMadeSystem) */
+.nx-maint {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  overflow: hidden;
+  background: #04060a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nx-rain {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  --c: #2aa9ff;
+  background-color: #000;
+  background-image:
+    radial-gradient(4px 100px at 0px 235px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 235px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 117.5px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 252px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 252px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 126px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 150px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 150px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 75px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 253px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 253px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 126.5px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 204px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 204px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 102px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 134px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 134px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 67px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 179px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 179px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 89.5px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 299px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 299px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 149.5px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 215px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 215px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 107.5px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 281px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 281px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 140.5px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 158px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 158px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 79px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 210px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 210px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 105px, var(--c) 100%, #0000 150%);
+  background-size:
+    300px 235px, 300px 235px, 300px 235px, 300px 252px, 300px 252px, 300px 252px,
+    300px 150px, 300px 150px, 300px 150px, 300px 253px, 300px 253px, 300px 253px,
+    300px 204px, 300px 204px, 300px 204px, 300px 134px, 300px 134px, 300px 134px,
+    300px 179px, 300px 179px, 300px 179px, 300px 299px, 300px 299px, 300px 299px,
+    300px 215px, 300px 215px, 300px 215px, 300px 281px, 300px 281px, 300px 281px,
+    300px 158px, 300px 158px, 300px 158px, 300px 210px, 300px 210px, 300px 210px;
+  animation: nx-rain-fall 150s linear infinite;
+}
+.nx-rain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: radial-gradient(circle at 50% 50%, #0000 0, #0000 2px, hsl(0 0 4%) 2px);
+  background-size: 8px 8px;
+  --f: blur(1em) brightness(6);
+  animation: nx-rain-hue 10s linear infinite;
+}
+@keyframes nx-rain-fall {
+  0% { background-position: 0px 220px, 3px 220px, 151.5px 337.5px, 25px 24px, 28px 24px, 176.5px 150px, 50px 16px, 53px 16px, 201.5px 91px, 75px 224px, 78px 224px, 226.5px 350.5px, 100px 19px, 103px 19px, 251.5px 121px, 125px 120px, 128px 120px, 276.5px 187px, 150px 31px, 153px 31px, 301.5px 120.5px, 175px 235px, 178px 235px, 326.5px 384.5px, 200px 121px, 203px 121px, 351.5px 228.5px, 225px 224px, 228px 224px, 376.5px 364.5px, 250px 26px, 253px 26px, 401.5px 105px, 275px 75px, 278px 75px, 426.5px 180px; }
+  to { background-position: 0px 6800px, 3px 6800px, 151.5px 6917.5px, 25px 13632px, 28px 13632px, 176.5px 13758px, 50px 5416px, 53px 5416px, 201.5px 5491px, 75px 17175px, 78px 17175px, 226.5px 17301.5px, 100px 5119px, 103px 5119px, 251.5px 5221px, 125px 8428px, 128px 8428px, 276.5px 8495px, 150px 9876px, 153px 9876px, 301.5px 9965.5px, 175px 13391px, 178px 13391px, 326.5px 13540.5px, 200px 14741px, 203px 14741px, 351.5px 15695px, 225px 1424px, 228px 1424px, 376.5px 1559.5px, 250px 5416px, 253px 5416px, 401.5px 5491px, 275px 17175px, 278px 17175px, 426.5px 17301.5px; }
+}
+@keyframes nx-rain-hue {
+  0% { backdrop-filter: var(--f) hue-rotate(0deg); }
+  to { backdrop-filter: var(--f) hue-rotate(360deg); }
+}
+.nx-maint-inner {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  max-width: 620px;
+  padding: 30px;
+}
+.nx-maint-inner .nx-eyebrow { color: #77d4e0; }
+.nx-maint-inner h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(34px, 8vw, 64px);
+  font-weight: 700;
+  color: #edf1fb;
+  letter-spacing: -0.02em;
+  margin: 14px 0 16px;
+  text-shadow: 0 0 40px rgba(119,212,224,0.35);
+}
+.nx-maint-inner p {
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  color: #9fb0d0;
+  line-height: 1.7;
+}
+
+/* ── единый аккаунт: модалка ── */
+.nx-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: #e0a86a;
+  margin: 0 0 8px;
+}
+.nx-modal-backdrop {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(5,8,15,0.78);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.nx-modal {
+  position: relative;
+  width: 100%; max-width: 440px;
+  max-height: 90vh; overflow-y: auto;
+  background: linear-gradient(160deg, #131a2a 0%, #0d1322 100%);
+  border: 1px solid #253048;
+  border-radius: 16px;
+  padding: 30px 28px;
+  box-shadow: 0 30px 80px -24px rgba(0,0,0,0.8);
+}
+.nx-modal-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 26px; font-weight: 700; color: #edf1fb; margin: 0 0 10px;
+}
+.nx-modal-copy {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px; color: #8b95b4; line-height: 1.6; margin: 0 0 20px;
+}
+.nx-modal-copy.small { font-size: 12px; margin-top: 14px; }
+.nx-close {
+  position: absolute; top: 14px; right: 16px;
+  background: transparent; border: none; color: #5a6484;
+  font-size: 16px; cursor: pointer; padding: 4px 8px; border-radius: 8px;
+}
+.nx-close:hover { color: #edf1fb; }
+.nx-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.14em; color: #6a7498;
+  margin-bottom: 14px; text-transform: uppercase;
+}
+.nx-input {
+  display: block; width: 100%; margin-top: 7px;
+  background: #0a0f1c; border: 1px solid #253048; border-radius: 10px;
+  padding: 11px 13px; color: #e6ecfb; font-size: 14px;
+  font-family: 'Outfit', sans-serif;
+}
+.nx-input:focus { outline: none; border-color: #77d4e0; box-shadow: 0 0 0 3px rgba(119,212,224,0.12); }
+.nx-sites { margin: 6px 0 16px; }
+.nx-sites-head {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em;
+  color: #6a7498; text-transform: uppercase; margin-bottom: 10px;
+}
+.nx-sites-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.nx-site {
+  display: flex; align-items: center; gap: 9px;
+  border: 1px solid #20293f; border-radius: 10px; padding: 9px 11px;
+  font-size: 13px; color: #8b95b4; cursor: pointer;
+  font-family: 'Outfit', sans-serif; transition: all 0.2s ease;
+}
+.nx-site.on { border-color: rgba(119,212,224,0.55); color: #e6ecfb; background: rgba(119,212,224,0.07); }
+.nx-site input { accent-color: #77d4e0; }
+.nx-primary {
+  width: 100%; margin-top: 6px;
+  background: rgba(119,212,224,0.12); color: #77d4e0;
+  border: 1px solid rgba(119,212,224,0.5); border-radius: 999px;
+  padding: 12px; font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
+}
+.nx-primary:hover { background: rgba(119,212,224,0.2); }
+.nx-primary:disabled { opacity: 0.5; cursor: default; }
+.nx-link {
+  display: block; width: 100%; margin-top: 14px; background: transparent;
+  border: none; color: #6a7498; font-size: 13px; cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+}
+.nx-link:hover { color: #77d4e0; }
+.nx-error { color: #e06060; font-size: 13px; margin: 4px 0 10px; font-family: 'Outfit', sans-serif; }
+.nx-notice { color: #5fe08a; font-size: 13px; margin: 4px 0 10px; font-family: 'Outfit', sans-serif; }
+
+/* ── консоль основателя ── */
+.nx-toggle-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.nx-toggle-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  border: 1px solid #20293f; border-radius: 12px; padding: 12px 14px;
+}
+.nx-toggle-row.on { border-color: rgba(240,201,58,0.6); background: rgba(240,201,58,0.07); }
+.nx-toggle-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.nx-toggle-info b { font-family: 'Outfit', sans-serif; font-size: 15px; color: #e6ecfb; }
+.nx-toggle-info span {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #5a6484;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.nx-switch {
+  flex-shrink: 0; width: 48px; height: 26px; border-radius: 999px;
+  background: #20293f; border: 1px solid #2b3550; position: relative; cursor: pointer;
+  transition: background 0.25s ease;
+}
+.nx-switch.on { background: rgba(240,201,58,0.35); border-color: #f0c93a; }
+.nx-knob {
+  position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%;
+  background: #8b95b4; transition: transform 0.25s ease, background 0.25s ease;
+}
+.nx-switch.on .nx-knob { transform: translateX(22px); background: #f0c93a; }
+
+/* ── кнопки пользователя в шапке ── */
+.nx-login-btn {
+  background: rgba(119,212,224,0.08); border: 1px solid rgba(119,212,224,0.45);
+  color: #77d4e0; border-radius: 999px; padding: 6px 16px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em;
+}
+.nx-login-btn:hover { background: rgba(119,212,224,0.18); }
+.nx-user { display: flex; align-items: center; gap: 8px; }
+.nx-user-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(119,212,224,0.08); border: 1px solid rgba(119,212,224,0.4);
+  border-radius: 999px; padding: 5px 13px 5px 6px; cursor: pointer; color: #cfe6ee;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+}
+.nx-user-chip:hover { background: rgba(119,212,224,0.16); }
+.nx-avatar {
+  width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+  background: #77d4e0; color: #0a1018; font-size: 10px; font-weight: 700;
+}
+.nx-logout {
+  background: transparent; border: none; color: #5a6484; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em;
+}
+.nx-logout:hover { color: #e06060; }
+
 
