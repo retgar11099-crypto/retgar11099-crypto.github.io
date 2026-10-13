@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { label: 'MANTANI', href: 'https://retgar11099-crypto.github.io/project-zomboid/' },
   { label: 'DSV-ZOMBI', href: 'https://retgar11099-crypto.github.io/dsv-zombi/' },
   { label: 'GIHTEN', href: 'https://retgar11099-crypto.github.io/gihten/' },
+  { label: 'RED LAUNCHER', href: 'https://red.protocold7.ru/' },
   { label: 'DISCORD', href: 'https://discord.gg/tqhwNTZgf3' },
 ]
 
@@ -53,6 +54,8 @@ function ServerCard({
   floatDelay,
   revealDelay,
   stripe,
+  glitch,
+  pattern,
 }: {
   code: string
   title: string
@@ -68,6 +71,8 @@ function ServerCard({
   floatDelay: string
   revealDelay: string
   stripe?: boolean
+  glitch?: boolean
+  pattern?: string
 }) {
   const [hovered, setHovered] = useState(false)
 
@@ -86,6 +91,7 @@ function ServerCard({
       href={href ?? '#'}
       target={href ? '_blank' : undefined}
       rel={href ? 'noopener noreferrer' : undefined}
+      className={'server-card' + (glitch ? ' glitch' : '')}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -121,6 +127,11 @@ function ServerCard({
           zIndex: 1,
         }}
       />
+
+      {/* per-site custom pattern overlay */}
+      {pattern && (
+        <span className={`card-pattern ${pattern}`} style={{ color: accentColor }} aria-hidden />
+      )}
 
       {/* caution-tape stripe for zomboid card */}
       {stripe && (
@@ -613,6 +624,7 @@ export default function App() {
             floatDelay="0s"
             revealDelay="1.2s"
             href="https://retgar11099-crypto.github.io/barotrauma/"
+            pattern="pattern-sonar"
           />
           <ServerCard
             code="SRV-002 // SKYH"
@@ -627,6 +639,7 @@ export default function App() {
             floatDelay="-4.5s"
             revealDelay="1.32s"
             href="https://retgar11099-crypto.github.io/skyhold/"
+            pattern="pattern-runes"
           />
           <ServerCard
             code="SRV-003 // MNTN"
@@ -642,6 +655,7 @@ export default function App() {
             revealDelay="1.44s"
             stripe
             href="https://retgar11099-crypto.github.io/project-zomboid/"
+            pattern="pattern-hazard"
           />
           <ServerCard
             code="SRV-004 // DSV"
@@ -657,6 +671,7 @@ export default function App() {
             floatDelay="-6.5s"
             revealDelay="1.56s"
             href="https://retgar11099-crypto.github.io/dsv-zombi/"
+            pattern="pattern-biohazard"
           />
           <ServerCard
             code="SRV-005 // GHTN"
@@ -670,6 +685,22 @@ export default function App() {
             floatDelay="-8s"
             revealDelay="1.68s"
             href="https://retgar11099-crypto.github.io/gihten/"
+            pattern="pattern-grid"
+          />
+          <ServerCard
+            code="SRV-006 // NC"
+            title="RED LAUNCHER"
+            subtitle="Cyberpunk 2077 — Night City Node"
+            desc="Терминал Ночного города: эпизоды, находки, шёпоты улиц и голос Джонни. Город, который никогда не спит."
+            tag="// Night City Archive"
+            accentColor="#ff4d4d"
+            glowColor="rgba(255,60,60,0.35)"
+            statusLabel="СИСТЕМА АКТИВНА"
+            floatDelay="-3.4s"
+            revealDelay="1.8s"
+            glitch
+            pattern="pattern-scan"
+            href="https://red.protocold7.ru/"
           />
         </div>
 

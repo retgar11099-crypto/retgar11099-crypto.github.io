@@ -826,3 +826,94 @@ html, body, #root {
   * { animation: none !important; }
 }
 
+/* === Server cards — custom per-site styling === */
+.server-card {
+  position: relative;
+}
+
+.card-pattern {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.5;
+  border-radius: inherit;
+  -webkit-mask-image: radial-gradient(ellipse at top right, #000 0%, transparent 72%);
+  mask-image: radial-gradient(ellipse at top right, #000 0%, transparent 72%);
+}
+
+.pattern-sonar {
+  background-image:
+    radial-gradient(circle at 84% 16%, transparent 26px, currentColor 27px, transparent 29px),
+    radial-gradient(circle at 84% 16%, transparent 46px, currentColor 47px, transparent 49px),
+    radial-gradient(circle at 84% 16%, transparent 66px, currentColor 67px, transparent 69px);
+}
+
+.pattern-runes {
+  background-image: repeating-linear-gradient(115deg, currentColor 0 1px, transparent 1px 26px);
+}
+
+.pattern-hazard {
+  background-image: repeating-linear-gradient(45deg, currentColor 0 10px, transparent 10px 24px);
+}
+
+.pattern-biohazard {
+  background-image: radial-gradient(currentColor 1.5px, transparent 2px);
+  background-size: 34px 34px;
+}
+
+.pattern-grid {
+  background-image:
+    linear-gradient(currentColor 1px, transparent 1px),
+    linear-gradient(90deg, currentColor 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+.pattern-scan {
+  background-image: repeating-linear-gradient(0deg, currentColor 0 1px, transparent 1px 4px);
+}
+
+/* glitch effect for the RED LAUNCHER card (whole button, not the text) */
+.server-card.glitch::before,
+.server-card.glitch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: inherit;
+  mix-blend-mode: screen;
+  opacity: 0;
+  background: linear-gradient(90deg, rgba(255, 0, 64, 0.34) 0%, rgba(0, 229, 255, 0.3) 100%);
+}
+
+.server-card.glitch::before { animation: glitch-slice-a 5.5s steps(1) infinite; }
+.server-card.glitch::after { animation: glitch-slice-b 5.5s steps(1) infinite; }
+
+.server-card.glitch:hover { animation: glitch-flicker 0.5s steps(1) infinite; }
+
+@keyframes glitch-slice-a {
+  0%, 40%, 44%, 70%, 74%, 100% { opacity: 0; transform: none; clip-path: inset(0 0 100% 0); }
+  41% { opacity: 0.9; transform: translateX(-6px); clip-path: inset(18% 0 62% 0); }
+  42% { opacity: 0.7; transform: translateX(5px);  clip-path: inset(44% 0 38% 0); }
+  43% { opacity: 0.85; transform: translateX(-3px); clip-path: inset(70% 0 12% 0); }
+  71% { opacity: 0.8; transform: translateX(6px);  clip-path: inset(30% 0 52% 0); }
+  72% { opacity: 0.75; transform: translateX(-4px); clip-path: inset(58% 0 24% 0); }
+}
+
+@keyframes glitch-slice-b {
+  0%, 40%, 44%, 70%, 74%, 100% { opacity: 0; transform: none; clip-path: inset(0 0 100% 0); }
+  41% { opacity: 0.6; transform: translateX(5px);  clip-path: inset(30% 0 50% 0); }
+  42% { opacity: 0.75; transform: translateX(-5px); clip-path: inset(60% 0 20% 0); }
+  71% { opacity: 0.6; transform: translateX(-6px); clip-path: inset(12% 0 70% 0); }
+  72% { opacity: 0.7; transform: translateX(4px);  clip-path: inset(48% 0 34% 0); }
+}
+
+@keyframes glitch-flicker {
+  0%, 100% { filter: none; }
+  47%      { filter: brightness(1.15) saturate(1.2); }
+  49%      { filter: brightness(0.92) hue-rotate(-12deg); }
+  51%      { filter: none; }
+}
+
+
