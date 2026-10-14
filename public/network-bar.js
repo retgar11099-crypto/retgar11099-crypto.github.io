@@ -29,10 +29,13 @@
       + ':host{all:initial}'
       + '*{box-sizing:border-box;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}'
       + '.wrap{position:fixed;left:14px;bottom:14px;z-index:2147483000;color:#e7ecf5}'
-      + '.btn{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #2a3654;border-radius:999px;background:rgba(10,14,24,.86);backdrop-filter:blur(8px);color:#e7ecf5;font:600 11px/1 ui-monospace,monospace;letter-spacing:.12em;cursor:pointer;user-select:none}'
-      + '.btn:hover{border-color:#e0a86a;color:#e0a86a}'
+      + '.row{display:flex;gap:8px;align-items:center}'
+      + '.pill{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #2a3654;border-radius:999px;background:rgba(10,14,24,.9);backdrop-filter:blur(8px);color:#e7ecf5;font:600 11px/1 ui-monospace,monospace;letter-spacing:.12em;text-decoration:none;cursor:pointer;user-select:none}'
+      + '.pill:hover{border-color:#e0a86a;color:#e0a86a}'
+      + '.hub{color:#e0a86a;border-color:#3a2f1a}'
+      + '.hub:hover{background:#e0a86a;color:#0a0e18}'
       + '.dot{width:7px;height:7px;border-radius:50%;background:#77d4e0;box-shadow:0 0 8px #77d4e0}'
-      + '.panel{position:absolute;left:0;bottom:44px;width:250px;padding:10px;border:1px solid #2a3654;border-radius:14px;background:rgba(10,14,24,.94);backdrop-filter:blur(10px);box-shadow:0 18px 40px rgba(0,0,0,.5);display:none}'
+      + '.panel{position:absolute;left:0;bottom:46px;width:250px;padding:10px;border:1px solid #2a3654;border-radius:14px;background:rgba(10,14,24,.95);backdrop-filter:blur(10px);box-shadow:0 18px 40px rgba(0,0,0,.5);display:none}'
       + '.panel.open{display:block}'
       + '.head{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 8px;border-bottom:1px solid #1d2740;margin-bottom:6px}'
       + '.head b{font:700 10px/1 ui-monospace,monospace;letter-spacing:.22em;color:#9aa7bd}'
@@ -55,7 +58,10 @@
       +   '<div id="list"></div>'
       +   '<a class="back" href="' + HUB + '">← ВЕРНУТЬСЯ В ХАБ</a>'
       + '</div>'
-      + '<div class="btn" id="btn" role="button" tabindex="0"><span class="dot"></span> NEXUS</div>';
+      + '<div class="row">'
+      +   '<a class="pill hub" href="' + HUB + '">← ХАБ</a>'
+      +   '<div class="pill" id="btn" role="button" tabindex="0"><span class="dot"></span> NEXUS</div>'
+      + '</div>';
     root.appendChild(wrap);
 
     var btn = wrap.querySelector('#btn');
