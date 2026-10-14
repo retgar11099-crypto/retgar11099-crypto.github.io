@@ -21,9 +21,11 @@ const FALLBACK_SITES: NexusSite[] = [
   { slug: 'project-zomboid', title: 'Project Mantani', url: 'https://retgar11099-crypto.github.io/project-zomboid/', maintenance: false, sort: 3 },
   { slug: 'dsv-zombi', title: 'DSV-Zombi', url: 'https://retgar11099-crypto.github.io/dsv-zombi/', maintenance: false, sort: 4 },
   { slug: 'gihten', title: 'Gihten', url: 'https://retgar11099-crypto.github.io/gihten/', maintenance: false, sort: 5 },
-  { slug: 'redlauncher', title: 'RED LAUNCHER', url: 'https://red.protocold7.ru/', maintenance: false, sort: 6 },
   { slug: 'watchgrid', title: 'WATCH_GRID', url: 'https://watch.protocold7.ru/', maintenance: false, sort: 7 },
 ]
+
+// Скрытые сайты: остаются в сети (доступ по секрету), но не показываются в хабе и консоли.
+const HIDDEN_SITE_SLUGS = new Set(['redlauncher'])
 
 function isFounder(me: Me | null) {
   return !!me && (me.role === 'founder' || me.nick.toLowerCase() === ADMIN_NICK.toLowerCase())
@@ -528,7 +530,7 @@ export default function App() {
     if (!sb) return
     const { data, error } = await sb.from('nexus_sites').select('slug,title,url,maintenance,sort').order('sort')
     if (error || !data) return
-    let list = data as NexusSite[]
+    let list = (data as NexusSite[]).filter((s) => !HIDDEN_SITE_SLUGS.has(s.slug))
     try {
       const { data: wg } = await sb.from('watchgrid_settings').select('key,value').eq('key', 'maintenance').maybeSingle()
       if (wg) list = list.map((s) => (s.slug === 'watchgrid' ? { ...s, maintenance: wg.value === 'true' } : s))
