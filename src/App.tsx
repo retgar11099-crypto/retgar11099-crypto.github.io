@@ -54,7 +54,7 @@ const NAV_LINKS = [
   { label: 'MANTANI', href: 'https://retgar11099-crypto.github.io/project-zomboid/' },
   { label: 'DSV-ZOMBI', href: 'https://retgar11099-crypto.github.io/dsv-zombi/' },
   { label: 'GIHTEN', href: 'https://retgar11099-crypto.github.io/gihten/' },
-  { label: 'RED LAUNCHER', href: 'https://red.protocold7.ru/' },
+  { label: 'WATCH_GRID', href: 'https://watch.protocold7.ru/' },
   { label: 'DISCORD', href: 'https://discord.gg/tqhwNTZgf3' },
 ]
 
@@ -991,20 +991,20 @@ export default function App() {
             maintenance={maintOf('gihten')}
           />
           <ServerCard
-            code="SRV-006 // NC"
-            title="RED LAUNCHER"
-            subtitle="Cyberpunk 2077 — Night City Node"
-            desc="Терминал Ночного города: эпизоды, находки, шёпоты улиц и голос Джонни. Город, который никогда не спит."
-            tag="// Night City Archive"
-            accentColor="#ff4d4d"
-            glowColor="rgba(255,60,60,0.35)"
-            statusLabel="СИСТЕМА АКТИВНА"
+            code="SRV-006 // WG"
+            title="WATCH_GRID"
+            subtitle="Watch Dogs — сообщество"
+            desc="Независимое русскоязычное сообщество Watch Dogs: лента кадров, темы, теории и люди, которым есть что скрывать."
+            tag="// DedSec Community"
+            accentColor="#f03b32"
+            glowColor="rgba(240,59,50,0.35)"
+            statusLabel="СЕТЬ АКТИВНА"
             floatDelay="-3.4s"
             revealDelay="1.8s"
             glitch
             pattern="pattern-scan"
-            href="https://red.protocold7.ru/"
-            maintenance={maintOf('redlauncher')}
+            href="https://watch.protocold7.ru/"
+            maintenance={maintOf('watchgrid')}
           />
         </div>
 
