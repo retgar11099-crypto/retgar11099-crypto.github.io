@@ -527,7 +527,13 @@ export default function App() {
   const loadSites = async () => {
     if (!sb) return
     const { data, error } = await sb.from('nexus_sites').select('slug,title,url,maintenance,sort').order('sort')
-    if (!error && data) setSites(data as NexusSite[])
+    if (error || !data) return
+    let list = data as NexusSite[]
+    try {
+      const { data: wg } = await sb.from('watchgrid_settings').select('key,value').eq('key', 'maintenance').maybeSingle()
+      if (wg) list = list.map((s) => (s.slug === 'watchgrid' ? { ...s, maintenance: wg.value === 'true' } : s))
+    } catch { /* ignore */ }
+    setSites(list)
   }
 
   useEffect(() => {
@@ -548,7 +554,10 @@ export default function App() {
         setMe(null)
       }
     })
-    const channel = sb.channel('nexus-sites').on('postgres_changes', { event: '*', schema: 'public', table: 'nexus_sites' }, loadSites).subscribe()
+    const channel = sb.channel('nexus-sites')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'nexus_sites' }, loadSites)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'watchgrid_settings' }, loadSites)
+      .subscribe()
     return () => { sub?.subscription?.unsubscribe?.(); sb.removeChannel(channel) }
   }, [])
 
@@ -558,7 +567,13 @@ export default function App() {
 
   const toggleMaintenance = async (slug: string, value: boolean) => {
     setSites((list) => list.map((s) => (s.slug === slug ? { ...s, maintenance: value } : s)))
-    if (sb) await sb.from('nexus_sites').update({ maintenance: value, updated_at: new Date().toISOString() }).eq('slug', slug)
+    if (!sb) return
+    if (slug === 'watchgrid') {
+      // WATCH_GRID держит техработы в своей таблице — используем её родной экран
+      await sb.from('watchgrid_settings').upsert({ key: 'maintenance', value: String(value) })
+    } else {
+      await sb.from('nexus_sites').update({ maintenance: value, updated_at: new Date().toISOString() }).eq('slug', slug)
+    }
   }
 
   const maintOf = (slug: string) => !!sites.find((s) => s.slug === slug)?.maintenance
