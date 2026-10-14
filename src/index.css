@@ -873,6 +873,10 @@ html, body, #root {
   background-image: repeating-linear-gradient(0deg, currentColor 0 1px, transparent 1px 4px);
 }
 
+.pattern-signal {
+  background-image: repeating-radial-gradient(circle at 84% 16%, currentColor 0 1px, transparent 1px 17px);
+}
+
 /* glitch effect for the RED LAUNCHER card (whole button, not the text) */
 .server-card.glitch::before,
 .server-card.glitch::after {

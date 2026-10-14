@@ -1001,8 +1001,7 @@ export default function App() {
             statusLabel="СЕТЬ АКТИВНА"
             floatDelay="-3.4s"
             revealDelay="1.8s"
-            glitch
-            pattern="pattern-scan"
+            pattern="pattern-signal"
             href="https://watch.protocold7.ru/"
             maintenance={maintOf('watchgrid')}
           />
