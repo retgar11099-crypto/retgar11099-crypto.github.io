@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0e131f" />
+    <title>NEXUS — нет соединения</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        display: flex; align-items: center; justify-content: center;
+        background: radial-gradient(circle at 50% 30%, #16213a 0%, #0e131f 55%, #080b13 100%);
+        color: #e7ecf5; font: 16px/1.6 system-ui, "Segoe UI", sans-serif;
+        padding: 24px; text-align: center;
+      }
+      .card { max-width: 460px; }
+      .glyph {
+        width: 78px; height: 78px; margin: 0 auto 22px;
+        border-radius: 20px; display: grid; place-items: center;
+        background: #0e131f; border: 1px solid #24304a;
+      }
+      .glyph span { position: relative; width: 42px; height: 42px; border-radius: 50%; border: 3px solid #e0a86a; }
+      .glyph span::after { content: ""; position: absolute; inset: 15px; border-radius: 50%; background: #77d4e0; }
+      h1 { font-size: 26px; margin: 0 0 10px; letter-spacing: .02em; }
+      p { margin: 0 0 22px; color: #9aa7bd; }
+      button {
+        padding: 12px 22px; border-radius: 10px; border: 1px solid #e0a86a;
+        background: transparent; color: #e0a86a; font: 600 14px/1 system-ui, sans-serif;
+        letter-spacing: .06em; cursor: pointer; transition: background .15s ease, color .15s ease;
+      }
+      button:hover { background: #e0a86a; color: #0e131f; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="glyph"><span></span></div>
+      <h1>Узел недоступен</h1>
+      <p>Нет соединения с сетью NEXUS. Проверь подключение и попробуй снова.</p>
+      <button onclick="location.reload()">Повторить</button>
+    </div>
+  </body>
+</html>

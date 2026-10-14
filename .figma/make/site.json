@@ -19,6 +19,6 @@
     "googleAnalyticsId": "G-Y81BVXC15T"
   },
   "customScripts": {
-    "headEnd": "<link rel=\"manifest\" href=\"manifest.webmanifest\" />\n    <meta name=\"theme-color\" content=\"#0e131f\" />\n    <link rel=\"apple-touch-icon\" href=\"icons/apple-touch-icon.png\" />"
+    "headEnd": "<link rel=\"manifest\" href=\"manifest.webmanifest\" />\n    <meta name=\"theme-color\" content=\"#0e131f\" />\n    <link rel=\"apple-touch-icon\" href=\"icons/apple-touch-icon.png\" />\n    <link rel=\"canonical\" href=\"https://protocold7.ru/\" />\n    <meta property=\"og:type\" content=\"website\" />\n    <meta property=\"og:url\" content=\"https://protocold7.ru/\" />\n    <meta property=\"og:site_name\" content=\"NEXUS\" />\n    <meta name=\"twitter:title\" content=\"NEXUS — Gaming Network Hub\" />\n    <meta name=\"twitter:description\" content=\"Центральный узел игровой сети: Barotrauma, Minecraft (SkyHold) и Project Zomboid (Mantani, DSV-Zombi).\" />"
   }
 }
