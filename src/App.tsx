@@ -516,6 +516,7 @@ export default function App() {
   const [statuses, setStatuses] = useState<Record<string, ServerStatus> | null>(null)
   const [cyber, setCyber] = useState(false)
   const [cyberError, setCyberError] = useState(false)
+  const [introSrc, setIntroSrc] = useState('intro.mp4')
   const [rebel, setRebel] = useState(false)
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [galleryIdx, setGalleryIdx] = useState<number | null>(null)
@@ -880,7 +881,11 @@ export default function App() {
           </div>
 
           <button
-            onClick={() => { setCyberError(false); setCyber(true) }}
+            onClick={() => {
+              setCyberError(false)
+              setIntroSrc(Math.random() < 0.5 ? 'intro.mp4' : 'intro-2.mp4')
+              setCyber(true)
+            }}
             style={{
               marginTop: '26px',
               fontFamily: 'JetBrains Mono',
@@ -1064,7 +1069,7 @@ export default function App() {
           <div className="cyber-tag">CYBERDECK ACTIVE · NEXUS</div>
           <video
             className="cyber-video"
-            src={import.meta.env.BASE_URL + 'intro.mp4'}
+            src={import.meta.env.BASE_URL + introSrc}
             autoPlay
             playsInline
             onEnded={() => setCyber(false)}
