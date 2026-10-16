@@ -13,7 +13,6 @@ const resolveNick = (user: any) => (user?.user_metadata?.nick as string) || user
 type Role = 'founder' | 'admin' | 'player'
 type Me = { id: string; nick: string; role: Role }
 type NexusSite = { slug: string; title: string; url: string; maintenance: boolean; sort: number }
-type NewsItem = { id: number; created_at: string; source: string; site: string | null; author: string | null; title: string | null; body: string }
 
 const FALLBACK_SITES: NexusSite[] = [
   { slug: 'hub', title: 'NEXUS HUB', url: 'https://protocold7.ru/', maintenance: false, sort: 0 },
@@ -106,7 +105,6 @@ function ServerCard({
   glitch,
   pattern,
   maintenance,
-  sameTab,
 }: {
   code: string
   title: string
@@ -125,7 +123,6 @@ function ServerCard({
   glitch?: boolean
   pattern?: string
   maintenance?: boolean
-  sameTab?: boolean
 }) {
   const [hovered, setHovered] = useState(false)
 
@@ -144,7 +141,7 @@ function ServerCard({
       <div style={{ animation: `float-soft 9s ease-in-out infinite`, animationDelay: floatDelay }}>
     <a
       href={href ?? '#'}
-      target={href && !sameTab ? '_blank' : undefined}
+      target={href ? '_blank' : undefined}
       rel={href ? 'noopener noreferrer' : undefined}
       className={'server-card' + (glitch ? ' glitch' : '')}
       onMouseEnter={() => setHovered(true)}
@@ -529,7 +526,6 @@ export default function App() {
   const [sites, setSites] = useState<NexusSite[]>(FALLBACK_SITES)
   const [authOpen, setAuthOpen] = useState(false)
   const [founderOpen, setFounderOpen] = useState(false)
-  const [news, setNews] = useState<NewsItem[]>([])
 
   const loadSites = async () => {
     if (!sb) return
@@ -585,23 +581,6 @@ export default function App() {
 
   const maintOf = (slug: string) => !!sites.find((s) => s.slug === slug)?.maintenance
   const hubMaint = maintOf('hub')
-
-  const loadNews = async () => {
-    if (!sb) return
-    const { data, error } = await sb.from('nexus_news').select('*').order('created_at', { ascending: false }).limit(30)
-    if (error || !data) return
-    setNews(data as NewsItem[])
-  }
-
-  useEffect(() => {
-    if (!sb) return
-    loadNews()
-    const ch = sb.channel('nexus-news')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'nexus_news' }, loadNews)
-      .subscribe()
-    const t = setInterval(loadNews, 60000)
-    return () => { clearInterval(t); sb.removeChannel(ch) }
-  }, [])
 
   useEffect(() => {
     let alive = true
@@ -1032,36 +1011,7 @@ export default function App() {
             pattern="pattern-signal"
             href="https://watch.protocold7.ru/"
             maintenance={maintOf('watchgrid')}
-            sameTab
           />
-        </div>
-
-        {/* news */}
-        <div style={{ marginBottom: '56px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '22px' }}>
-            <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#e0a86a', letterSpacing: '0.24em', textTransform: 'uppercase' }}>◇ Новости сети</span>
-            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, #2a3654, transparent)' }} />
-          </div>
-          {news.length === 0 ? (
-            <div style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: '#4a5474', letterSpacing: '0.1em' }}>Пока новостей нет.</div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {news.map((n) => {
-                const label = n.site ? (sites.find((s) => s.slug === n.site)?.title || n.site) : (n.source === 'discord' ? 'Discord' : 'NEXUS')
-                return (
-                  <div key={n.id} style={{ background: 'rgba(13,19,34,0.7)', border: '1px solid #1f2940', borderRadius: '12px', padding: '16px 18px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: n.source === 'discord' ? '#a88cff' : '#77d4e0', letterSpacing: '0.14em', textTransform: 'uppercase' }}>{label}</span>
-                      <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#4a5474' }}>{new Date(n.created_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                    {n.title && <div style={{ fontFamily: 'Outfit', fontSize: '17px', fontWeight: 600, color: '#edf1fb', marginBottom: '6px' }}>{n.title}</div>}
-                    <div style={{ fontFamily: 'Outfit', fontSize: '14px', fontWeight: 300, color: '#8b95b4', whiteSpace: 'pre-wrap' }}>{n.body}</div>
-                    {n.author && <div style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: '#4a5474', marginTop: '8px' }}>— {n.author}</div>}
-                  </div>
-                )
-              })}
-            </div>
-          )}
         </div>
 
         <div style={{ textAlign: 'center', marginBottom: '56px' }}>
