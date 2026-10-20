@@ -1,4 +1,4 @@
-const CACHE = 'nexus-hub-v1'
+const CACHE = 'nexus-hub-v2'
 const OFFLINE_URL = './offline.html'
 const PRECACHE = ['./', './index.html', './offline.html', './manifest.webmanifest', './favicon.svg']
 
