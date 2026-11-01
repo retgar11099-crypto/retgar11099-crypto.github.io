@@ -105,6 +105,7 @@ function ServerCard({
   glitch,
   pattern,
   maintenance,
+  notice,
 }: {
   code: string
   title: string
@@ -123,12 +124,16 @@ function ServerCard({
   glitch?: boolean
   pattern?: string
   maintenance?: boolean
+  notice?: { hint?: string; lines: string[] }
 }) {
   const [hovered, setHovered] = useState(false)
+  const [noticeOpen, setNoticeOpen] = useState(false)
 
   const online = status?.online
-  const dotColor = maintenance ? '#f0c93a' : status ? (online ? '#5fe08a' : '#e06060') : accentColor
-  const statusText = maintenance
+  const dotColor = maintenance ? '#f0c93a' : notice ? '#e06060' : status ? (online ? '#5fe08a' : '#e06060') : accentColor
+  const statusText = notice
+    ? 'ЗАКРЫТ'
+    : maintenance
     ? 'ТЕХ РАБОТЫ'
     : status
       ? online
@@ -141,8 +146,9 @@ function ServerCard({
       <div style={{ animation: `float-soft 9s ease-in-out infinite`, animationDelay: floatDelay }}>
     <a
       href={href ?? '#'}
-      target={href ? '_blank' : undefined}
+      target={href && !notice ? '_blank' : undefined}
       rel={href ? 'noopener noreferrer' : undefined}
+      onClick={notice ? (e: React.MouseEvent) => { e.preventDefault(); setNoticeOpen(true) } : undefined}
       className={'server-card' + (glitch ? ' glitch' : '')}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -225,7 +231,7 @@ function ServerCard({
           }}
         >
           <span style={{ position: 'relative', display: 'inline-flex', width: '7px', height: '7px' }}>
-            {(!status || online) && (
+            { (!status || online) && !notice && (
               <span
                 style={{
                   position: 'absolute',
@@ -307,25 +313,147 @@ function ServerCard({
             display: 'inline-flex',
             alignItems: 'center',
             gap: '10px',
-            fontFamily: 'JetBrains Mono',
-            fontSize: '12px',
-            color: hovered ? accentColor : '#5a6484',
-            transition: 'color 0.35s ease',
-            letterSpacing: '0.1em',
-            padding: '9px 18px',
-            borderRadius: '999px',
-            border: `1px solid ${hovered ? accentColor + '55' : '#20293f'}`,
-            background: hovered ? accentColor + '12' : 'transparent',
+            flexWrap: 'wrap',
           }}
         >
-          <span>ПЕРЕЙТИ</span>
-          <span style={{ transform: hovered ? 'translateX(4px)' : 'translateX(0)', transition: 'transform 0.35s ease' }}>
-            →
-          </span>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontFamily: 'JetBrains Mono',
+              fontSize: '12px',
+              color: hovered ? accentColor : '#5a6484',
+              transition: 'color 0.35s ease',
+              letterSpacing: '0.1em',
+              padding: '9px 18px',
+              borderRadius: '999px',
+              border: `1px solid ${hovered ? accentColor + '55' : '#20293f'}`,
+              background: hovered ? accentColor + '12' : 'transparent',
+              cursor: notice ? 'pointer' : 'default',
+            }}
+          >
+            <span>{notice ? 'К СТРОИТЕЛЯМ' : 'ПЕРЕЙТИ'}</span>
+            <span style={{ transform: hovered ? 'translateX(4px)' : 'translateX(0)', transition: 'transform 0.35s ease' }}>
+              →
+            </span>
+          </div>
+          {notice && (
+            <div
+              onClick={(e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setNoticeOpen(true) }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '7px',
+                fontFamily: 'JetBrains Mono',
+                fontSize: '10px',
+                letterSpacing: '0.14em',
+                color: noticeOpen ? accentColor : '#8b95b4',
+                border: `1px dashed ${accentColor}44`,
+                borderRadius: '999px',
+                padding: '7px 14px',
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{ color: accentColor }}>⚒</span>
+              <span>{notice.hint || 'СТРОИТЕЛИ'}</span>
+            </div>
+          )}
         </div>
       </div>
     </a>
       </div>
+      {notice && noticeOpen && (
+        <div
+          onClick={() => setNoticeOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9400,
+            display: 'grid',
+            placeItems: 'center',
+            background: 'rgba(5, 6, 10, 0.82)',
+            padding: '20px',
+          }}
+        >
+          <div
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            style={{
+              position: 'relative',
+              width: 'min(480px, 100%)',
+              background: 'linear-gradient(180deg, #17151d, #101017)',
+              border: `1px solid ${accentColor}66`,
+              boxShadow: `0 0 44px ${glowColor}, inset 0 0 60px rgba(0,0,0,0.5)`,
+              fontFamily: 'Outfit, sans-serif',
+              color: '#e6ecfb',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '13px 16px',
+                borderBottom: `1px solid ${accentColor}33`,
+                background: accentColor + '0d',
+                fontFamily: 'JetBrains Mono',
+                fontSize: '12px',
+                letterSpacing: '0.14em',
+                color: accentColor,
+              }}
+            >
+              <span>⚒ ЗИМОВАНИЕ СТРОИТЕЛЕЙ</span>
+              <span
+                style={{
+                  marginLeft: 'auto',
+                  fontSize: '9px',
+                  letterSpacing: '0.2em',
+                  color: '#e0a060',
+                  border: '1px solid rgba(224, 160, 96, 0.45)',
+                  padding: '2px 7px',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                ПРОЕКТ ЗАКРЫТ
+              </span>
+              <button
+                onClick={() => setNoticeOpen(false)}
+                aria-label="Закрыть"
+                style={{
+                  background: 'none',
+                  border: 0,
+                  color: accentColor,
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  lineHeight: 1,
+                  marginLeft: '10px',
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ position: 'relative', padding: '18px 20px 20px' }}>
+              {notice.lines.map((l, i) => (
+                <p
+                  key={i}
+                  style={{
+                    margin: '0 0 12px',
+                    fontSize: '14px',
+                    lineHeight: 1.65,
+                    color: '#cfd8ee',
+                    borderLeft: `2px solid ${accentColor}77`,
+                    paddingLeft: '12px',
+                  }}
+                >
+                  {l}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -947,6 +1075,13 @@ export default function App() {
             href="https://retgar11099-crypto.github.io/skyhold/"
             pattern="pattern-runes"
             maintenance={maintOf('skyhold')}
+            notice={{
+              lines: [
+                'Привал, странник. Строители свернули лагерь у ворот Джандара.',
+                'Сайт закрыт: проект SkyHold больше не работает.',
+                'Когда-то здесь были хроники и указы короля. Теперь тишина и груды камней. Спасибо, что был с нами.',
+              ],
+            }}
           />
           <ServerCard
             code="SRV-003 // MNTN"
