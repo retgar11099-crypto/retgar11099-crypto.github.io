@@ -52,8 +52,8 @@
     css.textContent = '' +
       '/* From Uiverse.io by Vosoone */' +
       '.main-container{display:flex;justify-content:center;align-items:center;height:100%;width:100%;overflow:hidden}' +
-      '.loader{width:100%;height:100%}' +
-      '#browser{overflow:hidden}' +
+      '.loader{width:min(320px,88vw);aspect-ratio:640/400}' +
+      '#browser{overflow:hidden;width:100%;height:auto;display:block}' +
       '.grid-line{stroke:#222;stroke-width:0.5}' +
       '.browser-frame{fill:#111;stroke:#666;stroke-width:1;filter:drop-shadow(0 0 10px rgba(0,0,0,0.9))}' +
       '.browser-top{fill:#1a1a1a}' +
@@ -67,7 +67,7 @@
       '.trace-flow:nth-child(4){stroke:url(#traceGradient4)}' +
       '@keyframes flow{from{stroke-dashoffset:720}to{stroke-dashoffset:0}}' +
       '@keyframes nxl-glow{0%,100%{text-shadow:0 0 18px rgba(0,170,255,.65),0 0 42px rgba(0,110,255,.4),0 0 80px rgba(0,204,255,.25)}50%{text-shadow:0 0 26px rgba(0,190,255,.85),0 0 58px rgba(0,130,255,.55),0 0 96px rgba(0,204,255,.35)}}' +
-      '.nxl-center{position:absolute;inset:0 0 7% 0;display:flex;align-items:center;justify-content:center;pointer-events:none}' +
+      '.nxl-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}' +
       '.nxl-nexus{font-family:Haettenschweiler,Impact,sans-serif;font-size:clamp(38px,9vw,72px);letter-spacing:.28em;text-indent:.28em;color:#f2f2f2;animation:nxl-glow 2.4s ease-in-out infinite}' +
       '#nxl-wrap{position:fixed;inset:0;z-index:99998;display:flex;background:#0a0a0a;transition:opacity .45s ease}' +
       '#nxl-wrap.nxl-hide{opacity:0;pointer-events:none}' +
